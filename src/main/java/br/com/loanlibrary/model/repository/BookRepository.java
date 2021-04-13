@@ -8,4 +8,6 @@ import br.com.loanlibrary.model.entity.Book;
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long>{
 
+	boolean existsByIsbn(String isbn);
+
 }

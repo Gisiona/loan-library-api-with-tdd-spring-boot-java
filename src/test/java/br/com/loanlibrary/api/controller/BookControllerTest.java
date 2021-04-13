@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.loanlibrary.api.dto.BookFormDto;
+import br.com.loanlibrary.api.exception.BusinessException;
 import br.com.loanlibrary.model.entity.Book;
 import br.com.loanlibrary.service.BookService;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,8 @@ import lombok.extern.slf4j.Slf4j;
 public class BookControllerTest {
 	
 	private static final String URL_API = "/api/books";
+
+	private static final String MSG_ERRO_ISBN_DUPLICADO = "ISBN já cadastrado.";
 	
 	@Autowired
 	MockMvc mvc;
@@ -70,7 +73,6 @@ public class BookControllerTest {
 			.andExpect(MockMvcResultMatchers.jsonPath("isbn").value(getBookDto().getIsbn()));
 	}
 
-
 	@Test
 	@DisplayName("Deve lancar uma exception ao tentar criar um livro com dados invalidos.")
 	public void createInvalidBookTest() throws Exception {
@@ -92,6 +94,30 @@ public class BookControllerTest {
 			.andExpect(status().isBadRequest())
 			.andExpect(MockMvcResultMatchers.jsonPath("errors", Matchers.hasSize(3)));
 	}
+	
+	@Test
+	@DisplayName("Deve lancar uma exception ao tentar criar um livro com ISBN já cadastrado anterior.")
+	public void createBookWithIsbnDuplicadoTest() throws Exception {
+		// cenario
+		String payload = new ObjectMapper().writeValueAsString(getBookDto());
+		
+		// execucao
+		BDDMockito.given(bookService.save(Mockito.any(Book.class))).willThrow(new BusinessException(MSG_ERRO_ISBN_DUPLICADO));
+		log.info("Payload Entrada: {}", payload);
+		
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+				.post(URL_API)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.content(payload);		
+				
+		// validacao
+		mvc.perform(request)
+			.andExpect(status().isBadRequest())
+			.andExpect(MockMvcResultMatchers.jsonPath("errors", Matchers.hasSize(1)))
+			.andExpect(MockMvcResultMatchers.jsonPath("errors[0]").value(MSG_ERRO_ISBN_DUPLICADO));
+	}
+	
 	
 	private Book getBookEntity() {		
 		return Book.builder()

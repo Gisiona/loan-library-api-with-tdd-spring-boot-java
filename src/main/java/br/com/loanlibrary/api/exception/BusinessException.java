@@ -1,5 +1,11 @@
 package br.com.loanlibrary.api.exception;
 
-public class BusinessException {
+import lombok.Data;
 
+@Data
+public class BusinessException extends RuntimeException {
+	
+	public BusinessException(String msg) {
+		super(msg);
+	}	
 }

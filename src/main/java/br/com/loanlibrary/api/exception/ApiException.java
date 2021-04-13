@@ -1,6 +1,7 @@
 package br.com.loanlibrary.api.exception;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.validation.BindingResult;
@@ -21,5 +22,9 @@ public class ApiException {
 		bindResult.getAllErrors()
 			.stream()
 			.forEach(erro -> errors.add(erro.getDefaultMessage()));
+	}
+	
+	public ApiException(BusinessException ex) {
+		this.errors = Arrays.asList(ex.getMessage());
 	}
 }

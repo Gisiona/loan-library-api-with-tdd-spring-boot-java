@@ -12,6 +12,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import br.com.loanlibrary.api.exception.BusinessException;
 import br.com.loanlibrary.model.entity.Book;
 import br.com.loanlibrary.model.repository.BookRepository;
 import br.com.loanlibrary.service.impl.BookServiceImpl;
@@ -26,6 +27,8 @@ class BookServiceTest {
 	
 	@MockBean 
 	BookRepository bookRepository;
+	
+	private static final String MSG_ERRO_ISBN_DUPLICADO = "ISBN já cadastrado.";
 	
 	@BeforeEach
 	public void init() {
@@ -51,6 +54,28 @@ class BookServiceTest {
 		Assertions.assertThat(bookSalvo.getIsbn()).isEqualTo(book.getIsbn());
 		Assertions.assertThat(bookSalvo.getDataCadastro()).isNotNull();
 	}
+	
+	@Test
+	@DisplayName("Deve lancar erro de negocio ao tentar salvar um livro com ISBN ja existente.")
+	void createLancarErroAoTentarSalvarUmBookWithIsbnDuplicadoTest() {
+		// cenario
+		Book book = getBookEntity();
+		Mockito.when(bookRepository.existsByIsbn(Mockito.anyString())).thenReturn(Boolean.TRUE);
+		
+		// execucao
+		Throwable exception = Assertions.catchThrowable( () -> bookService.save(book));
+		
+		log.info("ISBN duplicado: {}", exception.getMessage());
+							
+		// validacao
+		Assertions.assertThat(exception)
+			.isInstanceOf(BusinessException.class)
+			.hasMessage(MSG_ERRO_ISBN_DUPLICADO);
+		
+		// valida que o metodo save() nao foi executado nenhuma vez
+		Mockito.verify(bookRepository, Mockito.never()).save(book);
+	}
+
 
 	private Book getBookEntity() {		
 		return Book.builder()
