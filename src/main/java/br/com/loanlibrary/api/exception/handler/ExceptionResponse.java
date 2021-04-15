@@ -31,4 +31,7 @@ public class ExceptionResponse {
 		
 		return ResponseEntity.badRequest().body(allErros);
 	}
+	
+	
+	
 }

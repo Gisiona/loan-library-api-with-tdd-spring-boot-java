@@ -3,6 +3,7 @@ package br.com.loanlibrary.api.controller;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
@@ -40,6 +41,8 @@ public class BookControllerTest {
 	private static final String URL_API = "/api/books";
 
 	private static final String MSG_ERRO_ISBN_DUPLICADO = "ISBN já cadastrado.";
+
+	private static final String MSG_ERRO_LIVRO_NAO_ENCONTRADO = "Livro não encontrado.";
 	
 	@Autowired
 	MockMvc mvc;
@@ -118,6 +121,52 @@ public class BookControllerTest {
 			.andExpect(MockMvcResultMatchers.jsonPath("errors[0]").value(MSG_ERRO_ISBN_DUPLICADO));
 	}
 	
+	
+	@Test
+	@DisplayName("Deve retornar os detalhes de um livro já cadastrado.")
+	public void getRetornarUmBookByIdTest() throws Exception {
+		// cenario
+		Long idBook = getBookDto().getCodigo();
+		
+		Book book = getBookEntity();
+		
+		// execucao
+		BDDMockito.given(bookService.getById(idBook)).willReturn(Optional.of(book));
+		
+		log.info("Payload Retorno: {}", book);
+		
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+				.get(URL_API.concat("/"+idBook))
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON);				
+				
+		// validacao
+		mvc.perform(request)
+			.andExpect(status().isOk())
+			.andExpect(MockMvcResultMatchers.jsonPath("codigo").value(getBookDto().getCodigo()))
+			.andExpect(MockMvcResultMatchers.jsonPath("titulo").value(getBookDto().getTitulo()))
+			.andExpect(MockMvcResultMatchers.jsonPath("autor").value(getBookDto().getAutor()))
+			.andExpect(MockMvcResultMatchers.jsonPath("isbn").value(getBookDto().getIsbn()));
+	}
+	
+	@Test
+	@DisplayName("Deve retornar uma exception NOT_FOUND de livro nao encontrado.")
+	public void getDeveRetornarUmaExceptionNotFoundBookByNaoEncontradoIdTest() throws Exception {
+		// cenario
+		Long idBook = getBookDto().getCodigo();
+				
+		// execucao
+		BDDMockito.given(bookService.getById(idBook)).willReturn(Optional.empty());
+		
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+				.get(URL_API.concat("/"+idBook))
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON);				
+				
+		// validacao
+		mvc.perform(request)
+			.andExpect(status().isNotFound());
+	}
 	
 	private Book getBookEntity() {		
 		return Book.builder()

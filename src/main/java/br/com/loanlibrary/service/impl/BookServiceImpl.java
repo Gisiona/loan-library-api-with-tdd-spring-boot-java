@@ -1,5 +1,7 @@
 package br.com.loanlibrary.service.impl;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import br.com.loanlibrary.api.exception.BusinessException;
@@ -23,6 +25,12 @@ public class BookServiceImpl implements BookService {
 			throw new BusinessException(MSG_ERRO_ISBN_DUPLICADO);
 		}
 		return bookRepository.save(book);
+	}
+
+	@Override
+	public Optional<Book> getById(Long idBook) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

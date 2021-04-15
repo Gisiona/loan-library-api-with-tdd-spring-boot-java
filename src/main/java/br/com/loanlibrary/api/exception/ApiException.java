@@ -25,6 +25,12 @@ public class ApiException {
 	}
 	
 	public ApiException(BusinessException ex) {
+		this.errors = new ArrayList<String>();
 		this.errors = Arrays.asList(ex.getMessage());
+	}
+	
+	public ApiException(String ex) {
+		this.errors = new ArrayList<String>();
+		this.errors = Arrays.asList(ex);
 	}
 }
