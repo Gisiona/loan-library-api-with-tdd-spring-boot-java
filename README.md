@@ -29,3 +29,28 @@ Para rodar os testes, utilize o comando abaixo:
 
 Contribuições são sempre bem-vindas! 
 Para contribuir lembre-se sempre de adicionar testes unitários para as novas classes com a devida documentação.
+
+## Deploy AWS
+chmod 400 aws_api_key.pem
+
+ec2-54-94-49-22.sa-east-1.compute.amazonaws.com
+
+ssh -i "aws_api_key.pem" ubuntu@ec2-54-94-49-22.sa-east-1.compute.amazonaws.com
+
+sudo apt update
+
+sudo apt install default-jre
+
+sudo apt install default-jdk
+
+sudo apt install openjdk-8-jdk
+
+sudo apt update
+
+sudo apt install maven
+
+buildando o projeto
+
+mvn clean package
+
+java -jar nome_arquivo.jar
